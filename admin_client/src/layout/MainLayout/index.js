@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { ToastContainer } from 'material-react-toastify';
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
@@ -21,8 +22,16 @@ const MainLayout = () => {
     const theme = useTheme();
     const matchDownLG = useMediaQuery(theme.breakpoints.down('xl'));
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const { drawerOpen } = useSelector((state) => state.menu);
+    const isLogged = useSelector((state) => state.auth.isLoggedIn);
+    // check login
+    useEffect(() => {
+        if (!isLogged) {
+            navigate('/login');
+        }
+    }, [isLogged, navigate]);
 
     // drawer toggler
     const [open, setOpen] = useState(drawerOpen);
@@ -53,6 +62,17 @@ const MainLayout = () => {
                 <Breadcrumbs navigation={navigation} title titleBottom card={false} divider={false} />
                 <Outlet />
             </Box>
+            <ToastContainer
+                position="bottom-right"
+                autoClose={3000}
+                hideProgressBar
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+            />
         </Box>
     );
 };

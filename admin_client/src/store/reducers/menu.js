@@ -9,6 +9,10 @@ const initialState = {
     componentDrawerOpen: true
 };
 
+const storeLocalStorage = (state) => {
+    localStorage.setItem('menu-active', state.openItem[0]);
+};
+
 // ==============================|| SLICE - MENU ||============================== //
 
 const menu = createSlice({
@@ -17,6 +21,7 @@ const menu = createSlice({
     reducers: {
         activeItem(state, action) {
             state.openItem = action.payload.openItem;
+            storeLocalStorage(state);
         },
 
         activeComponent(state, action) {

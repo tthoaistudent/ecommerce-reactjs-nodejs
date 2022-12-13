@@ -1,5 +1,7 @@
 import React from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
 
 // material-ui
 import {
@@ -25,6 +27,7 @@ import { Formik } from 'formik';
 // project import
 import FirebaseSocial from './FirebaseSocial';
 import AnimateButton from 'components/@extended/AnimateButton';
+import { login } from 'store/reducers/auth';
 
 // assets
 import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
@@ -33,6 +36,9 @@ import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 
 const AuthLogin = () => {
     const [checked, setChecked] = React.useState(false);
+    const isLogged = useSelector((state) => state.auth.isLoggedIn);
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const [showPassword, setShowPassword] = React.useState(false);
     const handleClickShowPassword = () => {
@@ -43,49 +49,52 @@ const AuthLogin = () => {
         event.preventDefault();
     };
 
+    const handleSubmit = async (values) => {
+        const { phone, password } = values;
+        const token = await dispatch(login({ phone, password }));
+        console.log(token);
+    };
+
+    useEffect(() => {
+        if (isLogged) {
+            navigate('/');
+        }
+    }, [isLogged, navigate]);
+
     return (
         <>
             <Formik
                 initialValues={{
-                    email: 'info@codedthemes.com',
-                    password: '123456',
-                    submit: null
+                    phone: '',
+                    password: ''
                 }}
                 validationSchema={Yup.object().shape({
-                    email: Yup.string().email('Must be a valid email').max(255).required('Email is required'),
+                    phone: Yup.string().max(11).required('Phone is required'),
                     password: Yup.string().max(255).required('Password is required')
                 })}
-                onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
-                    try {
-                        setStatus({ success: false });
-                        setSubmitting(false);
-                    } catch (err) {
-                        setStatus({ success: false });
-                        setErrors({ submit: err.message });
-                        setSubmitting(false);
-                    }
-                }}
+                onSubmit={handleSubmit}
             >
                 {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (
                     <form noValidate onSubmit={handleSubmit}>
                         <Grid container spacing={3}>
                             <Grid item xs={12}>
                                 <Stack spacing={1}>
-                                    <InputLabel htmlFor="email-login">Email Address</InputLabel>
+                                    <InputLabel htmlFor="phone">Phone</InputLabel>
                                     <OutlinedInput
-                                        id="email-login"
-                                        type="email"
-                                        value={values.email}
-                                        name="email"
+                                        id="phone"
+                                        type="text"
+                                        value={values.phone}
+                                        name="phone"
+                                        autoComplete="off"
                                         onBlur={handleBlur}
                                         onChange={handleChange}
-                                        placeholder="Enter email address"
+                                        placeholder="Enter phone number"
                                         fullWidth
-                                        error={Boolean(touched.email && errors.email)}
+                                        error={Boolean(touched.phone && errors.phone)}
                                     />
-                                    {touched.email && errors.email && (
+                                    {touched.phone && errors.phone && (
                                         <FormHelperText error id="standard-weight-helper-text-email-login">
-                                            {errors.email}
+                                            {}
                                         </FormHelperText>
                                     )}
                                 </Stack>
@@ -100,6 +109,7 @@ const AuthLogin = () => {
                                         type={showPassword ? 'text' : 'password'}
                                         value={values.password}
                                         name="password"
+                                        autoComplete="current-password"
                                         onBlur={handleBlur}
                                         onChange={handleChange}
                                         endAdornment={
